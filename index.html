@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DemoPage for popup_window.js</title>
+    <script>
+        function appendEventCapturedList(elememtId, eventText)
+        {
+            const eventListView = document.getElementById(elememtId);
+            const eventView = document.createElement('li');
+
+            const timeString = new Date().toTimeString();
+            const eventItem = document.createTextNode(`[${timeString}] ${eventText}`);
+
+            eventView.appendChild(eventItem);
+            eventListView.appendChild(eventView);
+        }
+    </script>
+</head>
+<body>
+    <main>
+        <h1>Demo</h1>
+        <hr>
+
+        <h2>URL based PopupWindow</h2>
+        <h3>Action</h3>
+        <button onclick="urlPopupWindow.open()">Open</button>
+        <button onclick="urlPopupWindow.close()">Close</button>
+        <button onclick="urlPopupWindow.closeSilently()">closeSilently</button>
+
+        <h3>See the event list of PopupWindow!</h3>
+        <ol id="url-popup-window-event-list">
+            <li>Not yet.</li>
+        </ol>
+        <hr>
+
+        <h2>Form based PopupWindow</h2>
+        <h3>Settings</h3>
+        <h4>Select http method</h4>
+        <section>
+            <input id="radio-method-get" type="radio" name="method" value="GET" onclick="document.form_demo.method=this.value" checked>
+            <label for="radio-method-get">GET</label>
+            <input id="radio-method-post" type="radio" name="method" value="POST" onclick="document.form_demo.method=this.value">
+            <label for="radio-method-post">POST</label>
+        </section>
+
+        <h4>Input data</h4>
+        <form name="form_demo" method="GET">
+            <ul>
+                <li>
+                    <section>
+                        <label for="text-data1">Data1</label>
+                        <input id="text-data1" type="text" name="data1" value="defaultValue1">
+                    </section>
+                </li>
+                <li>
+                    <section>
+                        <label for="text-data2">Data2</label>
+                        <input id="text-data2" type="text" name="data2" value="defaultValue2">
+                    </section>
+                </li>
+            </ul>
+        </form>
+
+        <h3>Action</h3>
+        <button onclick="formPopupWindow.open()">Open</button>
+        <button onclick="formPopupWindow.close()">Close</button>
+        <button onclick="formPopupWindow.closeSilently()">closeSilently</button>
+
+        <h3>See the event list of PopupWindow!</h3>
+        <ol id="form-popup-window-event-list">
+            <li>Not yet.</li>
+        </ol>
+    </main>
+
+    <script src="popup_window.js"></script>
+    <script>
+        const urlPopupWindow = (function() {
+            let win = null;
+
+            const open = function() {
+                if (win !== null && win.isOpened()) {
+                    alert('You should close the opened popup window.');
+                    win.focus();
+                    return false;
+                }
+
+                win = new PopupWindow({
+                    url: 'https://httpbin.org/get?hello=world',
+                    onBeforeOpen: function() {
+                        appendEventCapturedList('url-popup-window-event-list', 'BeforeOpen.');
+                    },
+                    onAfterClose: function() {
+                        appendEventCapturedList('url-popup-window-event-list', 'AfterClose.');
+                    },
+                });
+
+                return win.open();
+            };
+
+            const close = function() {
+                if (win === null || win.isClosed()) {
+                    return true;
+                }
+
+                return win.close();
+            };
+
+            const closeSilently = function() {
+                if (win === null || win.isClosed()) {
+                    return true;
+                }
+
+                return win.closeSilently();
+            };
+
+            return {
+                open: open,
+                close: close,
+                closeSilently, closeSilently,
+            };
+        })();
+
+        const formPopupWindow = (function() {
+            let win = null;
+
+            const open = function() {
+                if (win !== null && win.isOpened()) {
+                    win.focus();
+                    alert('You should close the opened popup window.');
+                    return false;
+                }
+
+                let url = 'https://httpbin.org/get?hello=world';
+                if (document.form_demo.method.toUpperCase() === 'POST') {
+                    url = 'https://httpbin.org/post?hello=world';
+                }
+
+                win = new PopupWindow({
+                    form: document.form_demo, // the form
+                    url: url, // action attribute of the form
+                    name: 'demo', // name of opened window
+                    onBeforeOpen: function() {
+                        appendEventCapturedList('form-popup-window-event-list', 'Opened.');
+                    },
+                    onAfterClose: function() {
+                        appendEventCapturedList('form-popup-window-event-list', 'Closed.');
+                    },
+                });
+
+                return win.open();
+            };
+
+            const close = function() {
+                if (win === null || win.isClosed()) {
+                    return true;
+                }
+
+                return win.close();
+            };
+
+            const closeSilently = function() {
+                if (win === null || win.isClosed()) {
+                    return true;
+                }
+
+                return win.closeSilently();
+            };
+
+            return {
+                open: open,
+                close: close,
+                closeSilently, closeSilently,
+            };
+        })();
+    </script>
+</body>
+</html>
